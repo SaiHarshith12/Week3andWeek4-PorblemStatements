@@ -2,140 +2,108 @@ import java.util.*;
 
 public class week3 {
 
-    // 🔵 Linear Search (First Occurrence)
-    public static int linearFirst(String[] arr, String target) {
+    // 🔵 Linear Search (unsorted)
+    public static void linearSearch(int[] arr, int target) {
         int comparisons = 0;
+        boolean found = false;
 
         for (int i = 0; i < arr.length; i++) {
             comparisons++;
-            if (arr[i].equals(target)) {
-                System.out.println("Linear First Index: " + i +
+            if (arr[i] == target) {
+                System.out.println("Linear: Found at index " + i +
                         " (Comparisons: " + comparisons + ")");
-                return i;
+                found = true;
+                break;
             }
         }
 
-        System.out.println("Not found (Comparisons: " + comparisons + ")");
-        return -1;
-    }
-
-    // 🔵 Linear Search (Last Occurrence)
-    public static int linearLast(String[] arr, String target) {
-        int comparisons = 0;
-        int index = -1;
-
-        for (int i = 0; i < arr.length; i++) {
-            comparisons++;
-            if (arr[i].equals(target)) {
-                index = i;
-            }
+        if (!found) {
+            System.out.println("Linear: Not found (Comparisons: " + comparisons + ")");
         }
-
-        System.out.println("Linear Last Index: " + index +
-                " (Comparisons: " + comparisons + ")");
-        return index;
     }
 
-    // 🟢 Binary Search (Find any occurrence)
-    public static int binarySearch(String[] arr, String target) {
-        int low = 0, high = arr.length - 1;
+    // 🟢 Lower Bound (first index >= target)
+    public static int lowerBound(int[] arr, int target) {
+        int low = 0, high = arr.length;
         int comparisons = 0;
 
-        while (low <= high) {
+        while (low < high) {
             int mid = (low + high) / 2;
             comparisons++;
 
-            int cmp = arr[mid].compareTo(target);
-
-            if (cmp == 0) {
-                System.out.println("Binary Found at Index: " + mid +
-                        " (Comparisons: " + comparisons + ")");
-                return mid;
-            } else if (cmp < 0) {
+            if (arr[mid] < target) {
                 low = mid + 1;
             } else {
-                high = mid - 1;
+                high = mid;
             }
         }
 
-        System.out.println("Not found (Comparisons: " + comparisons + ")");
-        return -1;
+        System.out.println("Binary (lower_bound) comparisons: " + comparisons);
+        return low;
     }
 
-    // 🟢 Count Occurrences using Binary Search
-    public static int countOccurrences(String[] arr, String target) {
-        int first = firstOccurrence(arr, target);
-        int last = lastOccurrence(arr, target);
+    // 🟢 Upper Bound (first index > target)
+    public static int upperBound(int[] arr, int target) {
+        int low = 0, high = arr.length;
 
-        if (first == -1) return 0;
-
-        return last - first + 1;
-    }
-
-    // Find first occurrence (Binary)
-    public static int firstOccurrence(String[] arr, String target) {
-        int low = 0, high = arr.length - 1;
-        int result = -1;
-
-        while (low <= high) {
+        while (low < high) {
             int mid = (low + high) / 2;
 
-            if (arr[mid].equals(target)) {
-                result = mid;
-                high = mid - 1; // move left
-            } else if (arr[mid].compareTo(target) < 0) {
+            if (arr[mid] <= target) {
                 low = mid + 1;
             } else {
-                high = mid - 1;
+                high = mid;
             }
         }
 
-        return result;
+        return low;
     }
 
-    // Find last occurrence (Binary)
-    public static int lastOccurrence(String[] arr, String target) {
-        int low = 0, high = arr.length - 1;
-        int result = -1;
+    // 🔻 Floor (largest ≤ target)
+    public static Integer floorValue(int[] arr, int target) {
+        int idx = lowerBound(arr, target);
 
-        while (low <= high) {
-            int mid = (low + high) / 2;
-
-            if (arr[mid].equals(target)) {
-                result = mid;
-                low = mid + 1; // move right
-            } else if (arr[mid].compareTo(target) < 0) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
+        if (idx < arr.length && arr[idx] == target) {
+            return arr[idx];
+        } else if (idx > 0) {
+            return arr[idx - 1];
         }
+        return null;
+    }
 
-        return result;
+    // 🔺 Ceiling (smallest ≥ target)
+    public static Integer ceilingValue(int[] arr, int target) {
+        int idx = lowerBound(arr, target);
+
+        if (idx < arr.length) {
+            return arr[idx];
+        }
+        return null;
     }
 
     // 🚀 Main
     public static void main(String[] args) {
 
-        String[] logs = {"accB", "accA", "accB", "accC"};
+        int[] unsorted = {50, 10, 100, 25};
+        int[] sorted = {10, 25, 50, 100};
 
-        System.out.println("Original Logs:");
-        System.out.println(Arrays.toString(logs));
+        int target = 30;
 
-        // 🔵 Linear Search
-        linearFirst(logs, "accB");
-        linearLast(logs, "accB");
+        System.out.println("Unsorted: " + Arrays.toString(unsorted));
+        linearSearch(unsorted, target);
 
-        // 🟢 Sort for Binary Search
-        Arrays.sort(logs);
+        System.out.println("\nSorted: " + Arrays.toString(sorted));
 
-        System.out.println("\nSorted Logs:");
-        System.out.println(Arrays.toString(logs));
+        Integer floor = floorValue(sorted, target);
+        Integer ceil = ceilingValue(sorted, target);
 
-        // 🟢 Binary Search
-        binarySearch(logs, "accB");
+        System.out.println("Floor(" + target + "): " +
+                (floor != null ? floor : "None"));
 
-        int count = countOccurrences(logs, "accB");
-        System.out.println("Total Occurrences of accB: " + count);
+        System.out.println("Ceiling(" + target + "): " +
+                (ceil != null ? ceil : "None"));
+
+        int insertPos = lowerBound(sorted, target);
+        System.out.println("Insertion index for " + target + ": " + insertPos);
     }
 }
